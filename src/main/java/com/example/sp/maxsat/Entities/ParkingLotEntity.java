@@ -1,24 +1,33 @@
 package com.example.sp.maxsat.Entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.sun.istack.NotNull;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor
+@ToString
+@Table(name = "ParkingLots")
 public class ParkingLotEntity {
 
     @Id
+    @NotNull
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long parkingLotId;
+
+    @NotNull
     private Long zoneId;
+
     private Boolean isGuarded;
+
     private Boolean isPaid;
+
     private Boolean isForHandicapped;
+
+    private Integer freeSpaces;
 }
