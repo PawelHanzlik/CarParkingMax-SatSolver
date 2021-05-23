@@ -48,4 +48,17 @@ public class ParkingLotServiceImpl implements ParkingLotService{
             this.parkingLotRepository.delete(parkingLot);
         }
     }
+
+    @Override
+    public void changeParkingLotOccupancy(Long parkingLotId, Integer newOccupancy) throws NoSuchParkingLotException{
+        Optional<ParkingLotEntity> parkingLotOptional = this.parkingLotRepository.findById(parkingLotId);
+        if (parkingLotOptional.isEmpty()){
+            throw new NoSuchParkingLotException();
+        }
+        else{
+            ParkingLotEntity parkingLot = parkingLotOptional.get();
+            parkingLot.setFreeSpaces(newOccupancy);
+            this.parkingLotRepository.save(parkingLot);
+        }
+    }
 }

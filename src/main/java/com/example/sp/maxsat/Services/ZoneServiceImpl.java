@@ -48,4 +48,17 @@ public class ZoneServiceImpl implements ZoneService{
             this.zoneRepository.delete(zone);
         }
     }
+
+    @Override
+    public void changeZoneOccupiedRatio(Long zoneId, Double newOccupiedRatio) throws NoSuchZoneException {
+        Optional<ZoneEntity> zoneOptional = this.zoneRepository.findById(zoneId);
+        if (zoneOptional.isEmpty()){
+            throw new NoSuchZoneException();
+        }
+        else{
+            ZoneEntity zone = zoneOptional.get();
+            zone.setOccupiedRatio(newOccupiedRatio);
+            this.zoneRepository.save(zone);
+        }
+    }
 }

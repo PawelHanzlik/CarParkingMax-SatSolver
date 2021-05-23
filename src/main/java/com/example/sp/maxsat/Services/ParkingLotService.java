@@ -11,4 +11,5 @@ public interface ParkingLotService {
     List<ParkingLotEntity> getAllParkingLots();
     ParkingLotEntity addParkingLot(ParkingLotEntity parkingLot);
     void deleteParkingLot(Long parkingLotId) throws NoSuchParkingLotException;
+    void changeParkingLotOccupancy(Long parkingLotId, Integer newOccupancy) throws NoSuchParkingLotException;
 }

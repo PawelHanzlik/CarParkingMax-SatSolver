@@ -11,4 +11,5 @@ public interface ZoneService {
     List<ZoneEntity> getAllZones();
     ZoneEntity addZone(ZoneEntity zone);
     void deleteZone(Long zoneId) throws NoSuchZoneException;
+    void changeZoneOccupiedRatio(Long zoneId, Double newOccupiedRatio) throws NoSuchZoneException;
 }
