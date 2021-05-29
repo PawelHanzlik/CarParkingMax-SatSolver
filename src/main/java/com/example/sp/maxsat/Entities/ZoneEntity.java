@@ -25,4 +25,10 @@ public class ZoneEntity {
 
     @NotNull
     private Double occupiedRatio;
+
+    @NotNull
+    private Double attractivenessRatio;
+
+    @NotNull
+    private Double requestRatio;
 }

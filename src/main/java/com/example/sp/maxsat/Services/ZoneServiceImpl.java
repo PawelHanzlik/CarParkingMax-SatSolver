@@ -61,4 +61,30 @@ public class ZoneServiceImpl implements ZoneService{
             this.zoneRepository.save(zone);
         }
     }
+
+    @Override
+    public void changeZoneAttractivenessRatio(Long zoneId, Double newAttractivenessRatio) throws NoSuchZoneException {
+        Optional<ZoneEntity> zoneOptional = this.zoneRepository.findById(zoneId);
+        if (zoneOptional.isEmpty()){
+            throw new NoSuchZoneException();
+        }
+        else{
+            ZoneEntity zone = zoneOptional.get();
+            zone.setAttractivenessRatio(newAttractivenessRatio);
+            this.zoneRepository.save(zone);
+        }
+    }
+
+    @Override
+    public void changeZoneRequestRatio(Long zoneId, Double newRequestRatio) throws NoSuchZoneException {
+        Optional<ZoneEntity> zoneOptional = this.zoneRepository.findById(zoneId);
+        if (zoneOptional.isEmpty()){
+            throw new NoSuchZoneException();
+        }
+        else{
+            ZoneEntity zone = zoneOptional.get();
+            zone.setRequestRatio(newRequestRatio);
+            this.zoneRepository.save(zone);
+        }
+    }
 }

@@ -82,6 +82,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ow2.sat4j</groupId>
+			<artifactId>org.ow2.sat4j.maxsat</artifactId>
+			<version>2.3.4</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
 			<version>2.10.1</version>
