@@ -1,7 +1,6 @@
 package com.example.sp.maxsat.UnitTest;
 
 import com.example.sp.maxsat.Entities.UserEntity;
-import com.example.sp.maxsat.Entities.ZoneEntity;
 import com.example.sp.maxsat.Exceptions.Classes.NoSuchUserException;
 import com.example.sp.maxsat.Exceptions.Classes.NoSuchZoneException;
 import com.example.sp.maxsat.Repositories.UserRepository;
