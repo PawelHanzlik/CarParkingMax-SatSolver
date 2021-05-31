@@ -64,7 +64,16 @@ public class Solver {
     int [] result;
     long [] zoneIds;
 
+
+    /**
+     * Konstruktor klasy inicjujący solver
+     * @param sectors tablica float z zajętością sektorów od 1-7, opis w lini 40, zajętość wpływa na wagi
+     * @param zoneIds id kolejnych stref (1-7) z bazydanych
+     * @throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
+     */
     public Solver(float [] sectors, long[] zoneIds) throws Exception {
+
+
         this.zoneIds = zoneIds;
 
         WeightedMaxSatDecorator solver = new WeightedMaxSatDecorator(SolverFactory.newDefault());
@@ -90,22 +99,24 @@ public class Solver {
                 // TODO : Napisać tu coś watościowego
                 throw new Exception("Nierozwiązywale warunki");
             }
-        }catch (ContradictionException e){
-            e.printStackTrace();
-        }catch (TimeoutException e){
+        }catch (ContradictionException | TimeoutException e){
             e.printStackTrace();
         }
 
     }
 
 
-
+    /**
+     * metoda testuje ile cech parkingu jest różnych od idealnego parkingu klienta
+     * @param Parking Parking to sprawdzenia jak bardzo pasuje do odpowiedniego miejsca
+     * @return ile zmiennych zdaniowych nie jest spełnionych przez ten parking
+     */
 
     public int test(ParkingLotEntity Parking) {
         int score = 1;
 
-        for (int i = 0; i < result.length; i++) {
-            if (result[i]<8 && result[i]>0 && zoneIds[result[i]-1] == Parking.getZoneId()){
+        for (int j : result) {
+            if (j < 8 && j > 0 && zoneIds[j - 1] == Parking.getZoneId()) {
                 score--;
             }
         }
