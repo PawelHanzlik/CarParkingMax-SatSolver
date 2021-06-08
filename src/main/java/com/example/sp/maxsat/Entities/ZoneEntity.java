@@ -31,4 +31,12 @@ public class ZoneEntity {
 
     @NotNull
     private Double requestRatio;
+
+    @NotNull
+    private int CordX;
+
+    @NotNull
+    private int CordY;
+
+    public long getPriority(){return Math.round(occupiedRatio-attractivenessRatio);}
 }

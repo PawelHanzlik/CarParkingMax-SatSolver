@@ -1,12 +1,14 @@
 package com.example.sp.maxsat;
 
 import com.example.sp.maxsat.Entities.ParkingLotEntity;
+import com.example.sp.maxsat.Entities.ZoneEntity;
 import org.sat4j.core.VecInt;
 import org.sat4j.maxsat.SolverFactory;
 import org.sat4j.maxsat.WeightedMaxSatDecorator;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.TimeoutException;
 import java.math.BigInteger;
+import java.util.List;
 
 public class Solver {
 
@@ -61,48 +63,63 @@ public class Solver {
 
     */
 
-    int [] result;
-    long [] zoneIds;
+    private int [] result;
+    private long [] zoneIds;
 
 
     /**
      * Konstruktor klasy inicjujący solver
-     * @param sectors tablica float z zajętością sektorów od 1-7, opis w lini 40, zajętość wpływa na wagi
-     * @param zoneIds id kolejnych stref (1-7) z bazydanych
+     * param sectors tablica float z zajętością sektorów od 1-7, opis w lini 40, zajętość wpływa na wagi
+     * param zoneIds id kolejnych stref (1-7) z bazydanych
      * @throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
      */
-    public Solver(float [] sectors, long[] zoneIds) throws Exception {
+    public Solver(List<ZoneEntity> zones) {
+
+        //float [] sectors,
 
 
-        this.zoneIds = zoneIds;
+
+        long[] zoneIds = new long[zones.size()];
+
 
         WeightedMaxSatDecorator solver = new WeightedMaxSatDecorator(SolverFactory.newDefault());
-        solver.setTimeout(3600);
+        solver.setTimeout(10);
 
         try {   //contradiction exeption...
             //Jeśli cecha to klauzula
             //Strefy jeśli zapotrzebowanie wysokie to ta a nie inna
             //
-            for (int i = 1; i < 8; i++) {
-                if (sectors[i] > 0) {
-                    int[] iarray = new int[]{1, 2, 3, 4, 5, 6, 7};
-                    iarray[i - 1] = (-i);
-                    solver.addClause(new VecInt(iarray));
-                    solver.setTopWeight(BigInteger.valueOf(Math.round(sectors[i])));
-                }
+
+
+            int[] sdata = new int[zones.size()];
+            for (int i = 0; i < zones.size(); i++) {
+                sdata[i] = i+1;
             }
+
+            for (int i = 0; i < zones.size(); i++) {
+
+                ZoneEntity e = zones.get(i);
+                zoneIds[i] = e.getZoneId();
+
+                int[] temp = sdata.clone();
+                temp[i] =(-1)*temp[i];
+                solver.addClause(new VecInt(temp));
+                solver.setTopWeight(BigInteger.valueOf(e.getPriority()));
+            }
+
+
 
             // Spróbuj dobrać optymalne klauzule
             if (solver.isSatisfiable()){
                 result = solver.model();
             }else{
                 // TODO : Napisać tu coś watościowego
-                throw new Exception("Nierozwiązywale warunki");
+                //throw new Exception("Nierozwiązywale warunki");
             }
         }catch (ContradictionException | TimeoutException e){
             e.printStackTrace();
         }
-
+        this.zoneIds = zoneIds;
     }
 
 
