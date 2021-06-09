@@ -84,6 +84,7 @@ public class Solver {
 
         WeightedMaxSatDecorator solver = new WeightedMaxSatDecorator(SolverFactory.newDefault());
         solver.setTimeout(10);
+        solver.newVar(zones.size());
 
         try {   //contradiction exeption...
             //Jeśli cecha to klauzula
@@ -93,7 +94,7 @@ public class Solver {
 
             int[] sdata = new int[zones.size()];
             for (int i = 0; i < zones.size(); i++) {
-                sdata[i] = i+1;
+                sdata[i] = (-1)*(i+1);
             }
 
             for (int i = 0; i < zones.size(); i++) {
