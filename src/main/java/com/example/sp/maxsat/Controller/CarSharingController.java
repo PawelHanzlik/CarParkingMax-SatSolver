@@ -21,6 +21,7 @@ public class CarSharingController {
 
     private final ZoneService zoneService;
     private final ParkingLotService parkingService;
+
     @Autowired
     public CarSharingController(ZoneService zoneService,ParkingLotService parkingLotService){
         this.zoneService = zoneService;
@@ -56,7 +57,7 @@ public class CarSharingController {
                 results.add(new zonetouple(parking.getParkingLotId(),solver.test(parking))));
 
         results.sort(Comparator.comparingInt(obj -> obj.Score));
-        return zoneService.getAllZones().size() + "\n" + results.toString();
+        return zoneService.getAllZones().size() + "\n" + results;
     }
 
     @GetMapping("/sfc")
