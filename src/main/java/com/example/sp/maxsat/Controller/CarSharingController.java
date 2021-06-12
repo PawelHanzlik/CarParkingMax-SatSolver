@@ -30,7 +30,6 @@ public class CarSharingController {
 
 
 
-
     @GetMapping("/sfps")
     public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,@RequestParam(value = "Lon", defaultValue = "0") int y) {
 
