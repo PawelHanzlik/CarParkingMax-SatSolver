@@ -19,17 +19,17 @@ public class UserServiceUnitTestDataProvider {
     public static List<UserEntity> userEntities;
 
     static {
-        userEntity = UserEntity.builder().userId(userId).carSize("small").preferableZone(1L).name("test").surname("test")
+        userEntity = UserEntity.builder().userId(userId).carSize(2).preferableZone(1L).name("test").surname("test")
                 .age(30).build();
-        userEntity1 = UserEntity.builder().userId(2L).carSize("small").preferableZone(1L).name("new_test").surname("new_test")
+        userEntity1 = UserEntity.builder().userId(2L).carSize(5).preferableZone(1L).name("new_test").surname("new_test")
                 .age(40).build();
-        userEntity2 = UserEntity.builder().userId(3L).carSize("small").preferableZone(1L).name("test").surname("test")
+        userEntity2 = UserEntity.builder().userId(3L).carSize(3).preferableZone(1L).name("test").surname("test")
                 .age(35).build();
-        userEntity3 = UserEntity.builder().userId(3L).carSize("medium").preferableZone(1L).name("test").surname("test")
+        userEntity3 = UserEntity.builder().userId(3L).carSize(4).preferableZone(1L).name("test").surname("test")
                 .age(35).build();
-        userEntity4 = UserEntity.builder().userId(4L).carSize("small").preferableZone(1L).name("test").surname("test")
+        userEntity4 = UserEntity.builder().userId(4L).carSize(2).preferableZone(1L).name("test").surname("test")
                 .age(30).build();
-        userEntity5 = UserEntity.builder().userId(4L).carSize("small").preferableZone(3L).name("test").surname("test")
+        userEntity5 = UserEntity.builder().userId(4L).carSize(6).preferableZone(3L).name("test").surname("test")
                 .age(30).build();
         zoneEntity = ZoneEntity.builder().zoneId(3L).zoneType("testType").occupiedRatio(0.6).attractivenessRatio(0.6)
                 .requestRatio(0.6).build();

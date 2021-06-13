@@ -99,9 +99,9 @@ public class UserServiceUnitTests {
     void changeUserCarSizeTest(){
         when(userRepository.findById(3L)).thenReturn(java.util.Optional.ofNullable(userEntity2));
         when(userRepository.save(any(UserEntity.class))).thenReturn(userEntity3);
-        this.userService.changeUserCarSize(3L,"medium");
+        this.userService.changeUserCarSize(3L,1);
         assertEquals(3L, userEntity2.getUserId());
-        assertEquals("medium", userEntity2.getCarSize());
+        assertEquals(1, userEntity2.getCarSize());
         assertEquals(1, userEntity2.getPreferableZone());
         assertEquals("test", userEntity2.getName());
         assertEquals("test", userEntity2.getSurname());
@@ -111,7 +111,7 @@ public class UserServiceUnitTests {
     @Test
     void changeUserCarSizeNoSuchUserExceptionTest(){
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        assertThrows(NoSuchUserException.class, () -> userService.changeUserCarSize(userId,"small"));
+        assertThrows(NoSuchUserException.class, () -> userService.changeUserCarSize(userId,2));
     }
 
     @Test

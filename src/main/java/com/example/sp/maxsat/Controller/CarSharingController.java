@@ -1,8 +1,10 @@
 package com.example.sp.maxsat.Controller;
 
 import com.example.sp.maxsat.Entities.ParkingLotEntity;
+import com.example.sp.maxsat.Entities.UserEntity;
 import com.example.sp.maxsat.Entities.ZoneEntity;
 import com.example.sp.maxsat.Services.ParkingLotService;
+import com.example.sp.maxsat.Services.UserService;
 import com.example.sp.maxsat.Services.ZoneService;
 import com.example.sp.maxsat.Solver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +23,13 @@ public class CarSharingController {
 
     private final ZoneService zoneService;
     private final ParkingLotService parkingService;
+    private final UserService userService;
 
     @Autowired
-    public CarSharingController(ZoneService zoneService,ParkingLotService parkingLotService){
+    public CarSharingController(ZoneService zoneService,ParkingLotService parkingLotService,UserService userService){
         this.zoneService = zoneService;
         this.parkingService = parkingLotService;
+        this.userService = userService;
     }
 
 
@@ -51,7 +55,7 @@ public class CarSharingController {
             }
         }
         List<zonetouple> results = new ArrayList<>();
-        Solver solver = new Solver(zones);
+        Solver solver = new Solver(zones,userService.getAllUsers().get(0));
         parkingService.getAllParkingLots().forEach(parking ->
                 results.add(new zonetouple(parking.getParkingLotId(),solver.test(parking))));
 
@@ -99,9 +103,24 @@ public class CarSharingController {
             parking.setIsGuarded(Math.random()>0.5);
             parking.setIsPaid(Math.random()>0.5);
             parking.setIsForHandicapped(Math.random()>0.5);
+            parking.setSpotSize((int) Math.round(Math.random()*5));
 
             parkingService.addParkingLot(parking);
         }
+
+        for (int i = 0; i < amount*amount*10; i++) {
+            UserEntity user = new UserEntity();
+            user.setCarSize((int) Math.round(Math.random()*10)+1);
+            user.setAge((int) (Math.round(Math.random()*50)+20));
+            user.setHandicaped(Math.random()>0.75);
+            user.setName("Jack");
+            user.setSurname("aaa");
+            user.setPreferableZone(zones.get((int) Math.round(Math.random()*(zones.size()-1))).getZoneId());
+
+            userService.addUser(user);
+        }
+
+
 
         return "ok ";
     }

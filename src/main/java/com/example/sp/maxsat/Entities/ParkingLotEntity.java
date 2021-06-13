@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @ToString
-@Table(name = "ParkingLots")
+@Table(name = "Parking_Lots")
 public class ParkingLotEntity {
 
     @Id
@@ -25,9 +25,11 @@ public class ParkingLotEntity {
 
     private Boolean isGuarded;
 
-    private Boolean isPaid;
+    private Boolean isPaid;// -> unikać
 
     private Boolean isForHandicapped;
 
     private Integer freeSpaces;
+
+    private Integer spotSize; // Rozmiar parkingu*-
 }

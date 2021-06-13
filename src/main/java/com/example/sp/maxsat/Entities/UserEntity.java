@@ -21,7 +21,7 @@ public class UserEntity {
     private Long userId;
 
     @NotNull
-    private String carSize;
+    private Integer carSize; // -> parking strzezony
 
     @NotNull
     private Long preferableZone;
@@ -34,4 +34,7 @@ public class UserEntity {
 
     @NotNull
     private Integer age;
+
+    @NotNull
+    private Boolean handicaped;
 }
