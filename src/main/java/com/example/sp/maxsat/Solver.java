@@ -11,6 +11,7 @@ import org.sat4j.specs.TimeoutException;
 import org.sat4j.tools.ModelIterator;
 import org.sat4j.tools.OptToSatAdapter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,8 +70,11 @@ public class Solver {
 
     */
 
-    private int [] result;
-    private long [] zoneIds;
+    //private int[] result;
+    //private long[] zoneIds;
+
+    private List<Integer> result = new ArrayList<>();
+    private List<Long> zoneIds = new ArrayList<>();
 
 
     /**
@@ -80,12 +84,6 @@ public class Solver {
      * @throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
      */
     public Solver(List<ZoneEntity> zones, UserEntity user) {
-
-        //float [] sectors,
-
-
-        long[] zoneIds = new long[zones.size()];
-
 
         final int MAXVAR = zones.size()+4;
         final int NBCLAUSES = zones.size()+1+2;//strefy + dodatkowa na strefy + niepełnosprawni itp(2)
@@ -113,12 +111,12 @@ public class Solver {
             // (best option to avoid dependencies on SAT4J IVecInt)
         for (int i=0;i<zones.size();i++) {
             int [] clause = new int[1];
-            clause[0] =i+1;
+            clause[0] =(-1)*(i+1);
             ZoneEntity e = zones.get(i);
-            zoneIds[i] = e.getZoneId();
+            zoneIds.add(e.getZoneId());
 
             try {
-                maxSatSolver.addSoftClause((int) ((-1)*e.getPriority()),new VecInt(clause)); // adapt Array to IVecInt
+                maxSatSolver.addSoftClause((int) (e.getPriority()+10),new VecInt(clause)); // adapt Array to IVecInt
             }catch (ContradictionException exception ){
                 System.out.println(exception.toString());
             }
@@ -150,8 +148,9 @@ public class Solver {
             //
             // Spróbuj dobrać optymalne klauzule
             if (solver.isSatisfiable()){
-                result = solver.model();
-                System.out.println(Arrays.toString(result));
+                int [] temp =solver.model();
+                for (int t : temp) result.add(t);
+                System.out.println(result.toString());
             }else{
                 // TODO : Napisać tu coś watościowego
                 System.out.println("Nierozwiązywale warunki\n");
@@ -173,21 +172,19 @@ public class Solver {
 
     public int test(ParkingLotEntity parking) {
         int score = 0;
-        List tempList = Arrays.asList(result);
 
-
-
-        int index = Arrays.asList(zoneIds).indexOf(parking.getZoneId());
+        long zone =parking.getZoneId();
+        int index = zoneIds.indexOf(zone);
         //strefa
-        if (index >(-1) && result[index]>0)
-            score++;
+        if (index >(-1) && result.get(index)>0)
+            score+=10;
 
 
 
         //todo : Ewidentnie zmienna o danym numerze nie ma stałego miejsca w tablicy
 
         //S8 - niepełnosprawni
-        if (tempList.contains(zoneIds.length+1)){
+        if (result.contains(zoneIds.size()+1)){
             //można zrobić (result[zoneIds.length]>0 == parking.getIsForHandicapped()) score ++
             // ale tak jest czytelniej
             if (parking.getIsForHandicapped())
@@ -198,15 +195,15 @@ public class Solver {
         }
 
         //S9 - 10 wolnych miejsc
-        if (tempList.contains(zoneIds.length+2) && parking.getFreeSpaces()>10)
+        if (result.contains(zoneIds.size()+2) && parking.getFreeSpaces()>10)
             score++;
 
         //S10 - Guarded
-        if (tempList.contains(zoneIds.length+3) && parking.getIsGuarded())
+        if (result.contains(zoneIds.size()+3) && parking.getIsGuarded())
             score++;
 
         //S11 - Rozmiar Miejsca
-        if(tempList.contains(zoneIds.length+4) && parking.getSpotSize()>5)
+        if(result.contains(zoneIds.size()+4) && parking.getSpotSize()>5)
             score++;
 
 
