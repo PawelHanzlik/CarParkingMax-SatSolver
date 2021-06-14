@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -87,9 +88,9 @@ public class CarSharingController {
             for (int y = (-1)*amount; y < amount; y++) {
             ZoneEntity zone = new ZoneEntity();
             zone.setZoneType("test");
-            zone.setOccupiedRatio(Math.random());
-            zone.setAttractivenessRatio(Math.random());
-            zone.setRequestRatio(Math.random());
+            zone.setOccupiedRatio(Math.round(Math.random()*100.0)/100.0);
+            zone.setAttractivenessRatio(Math.round(Math.random()*100.0)/100.0);
+            zone.setRequestRatio(Math.round(Math.random()*100.0)/100.0);
             zone.setCordX(x);
             zone.setCordY(y);
             zoneService.addZone(zone);
