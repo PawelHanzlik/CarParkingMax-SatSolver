@@ -92,7 +92,7 @@ public class Solver {
         int[] sdata = new int[zones.size()];
         for (int i = 0; i < zones.size(); i++) {
             sdata[i] = (i+1);
-            // aka [-1 -2 -3 .. -n]
+            // aka [1 2 3 .. n]
         }
 
         //WeightedMaxSatDecorator solver = new WeightedMaxSatDecorator(SolverFactory.newDefault());
@@ -116,15 +116,16 @@ public class Solver {
             zoneIds.add(e.getZoneId());
 
             try {
-                maxSatSolver.addSoftClause((int) (e.getPriority()+10),new VecInt(clause)); // adapt Array to IVecInt
+                maxSatSolver.addSoftClause((int) (e.getPriority()),new VecInt(clause)); // adapt Array to IVecInt
             }catch (ContradictionException exception ){
                 System.out.println(exception.toString());
             }
+            //System.out.println(e.getPriority());
         }
 
         try {
             //Wymuś wybranie przynajmniej jednej strefy
-            maxSatSolver.addClause(new VecInt(sdata));
+            maxSatSolver.addSoftClause(999999,new VecInt(sdata));
             //U8
             if (user.getHandicaped()){
                 maxSatSolver.addSoftClause(10,new VecInt(new int[]{8,10}));

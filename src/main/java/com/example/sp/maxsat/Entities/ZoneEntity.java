@@ -38,5 +38,5 @@ public class ZoneEntity {
     @NotNull
     private int CordY;
 
-    public long getPriority(){return Math.round((occupiedRatio-requestRatio)*100);}
+    public long getPriority(){return (Math.round((occupiedRatio-requestRatio)*5))+11;}
 }

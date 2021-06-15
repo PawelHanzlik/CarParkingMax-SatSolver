@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,6 +25,8 @@ public class CarSharingController {
     private final ParkingLotService parkingService;
     private final UserService userService;
 
+    private int sfpcTestcounter = 0;
+
     @Autowired
     public CarSharingController(ZoneService zoneService,ParkingLotService parkingLotService,UserService userService){
         this.zoneService = zoneService;
@@ -36,7 +37,7 @@ public class CarSharingController {
 
 
     @GetMapping("/sfps")
-    public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,@RequestParam(value = "Lon", defaultValue = "0") int y) {
+    public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,@RequestParam(value = "Lon", defaultValue = "0") int y,@RequestParam(value = "user", defaultValue = "-1")int user) {
 
         List<ZoneEntity> zones = new ArrayList<>();
         //wybierz strefy z bazy danych które przylegają do lokacji
@@ -55,8 +56,12 @@ public class CarSharingController {
                 return String.format("ZoneId: %d     Score: %d \n", ZoneId,Score);
             }
         }
+        int NoUser;
+        if (user == (-1)) NoUser = this.sfpcTestcounter++;
+        else NoUser = user;
+
         List<zonetouple> results = new ArrayList<>();
-        Solver solver = new Solver(zones,userService.getAllUsers().get(0));
+        Solver solver = new Solver(zones,userService.getAllUsers().get(NoUser));
         parkingService.getAllParkingLots().forEach(parking ->
                 results.add(new zonetouple(parking.getParkingLotId(),solver.test(parking))));
 
