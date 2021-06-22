@@ -25,7 +25,7 @@ public class CarSharingController {
     private final ParkingLotService parkingService;
     private final UserService userService;
 
-    private int sfpcTestcounter = 0;
+    private int sfpcTestCounter = 0;
 
     @Autowired
     public CarSharingController(ZoneService zoneService,ParkingLotService parkingLotService,UserService userService){
@@ -37,36 +37,51 @@ public class CarSharingController {
 
 
     @GetMapping("/sfps")
-    public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,@RequestParam(value = "Lon", defaultValue = "0") int y,@RequestParam(value = "user", defaultValue = "-1")int user) {
+    public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,
+                                       @RequestParam(value = "Lon", defaultValue = "0") int y,
+                                       @RequestParam(value = "userId", defaultValue = "-1")int userId) {
 
         List<ZoneEntity> zones = new ArrayList<>();
         //wybierz strefy z bazy danych które przylegają do lokacji
         zoneService.getAllZones().forEach(zone -> {
-            if ((zone.getCordX()<= x+1 & zone.getCordX()>= x-1 & zone.getCordY()<= y+1 & zone.getCordY()>= y) ||
-                    (zone.getCordX()==x & zone.getCordY()==y-1)){ zones.add(zone);}
+            if (zoneService.isAdjacent(zone, x, y)) {
+                zones.add(zone);
+            }
         });
 
-        class zonetouple{
-            public final long ZoneId;
+        class zoneTuple {
+            public final long ParkingId;
             public final int Score;
-            public zonetouple(long parkingId,int Score){this.ZoneId = parkingId;this.Score=Score;}
+
+            public zoneTuple(long parkingId, int Score) {
+                this.ParkingId = parkingId;
+                this.Score = Score;
+            }
 
             @Override
-            public String toString(){
-                return String.format("ZoneId: %d     Score: %d \n", ZoneId,Score);
+            public String toString() {
+                return String.format("ParkingId: %d     Score: %d \n", ParkingId, Score);
             }
         }
-        int NoUser;
-        if (user == (-1)) NoUser = this.sfpcTestcounter++;
-        else NoUser = user;
 
-        List<zonetouple> results = new ArrayList<>();
-        Solver solver = new Solver(zones,userService.getAllUsers().get(NoUser));
+        int NoUser;
+        if (userId == (-1)) NoUser = this.sfpcTestCounter++;
+        else NoUser = userId;
+
+        List<zoneTuple> results = new ArrayList<>();
+        //try {
+        Solver solver = new Solver(zones, userService.getAllUsers().get(NoUser));
         parkingService.getAllParkingLots().forEach(parking ->
-                results.add(new zonetouple(parking.getParkingLotId(),solver.test(parking))));
+                results.add(new zoneTuple(parking.getParkingLotId(), solver.test(parking))));
 
         results.sort(Comparator.comparingInt(obj -> obj.Score));
         return zoneService.getAllZones().size() + "\n" + results;
+        /*}catch (NoSuchUserException ex){
+            System.out.println("User with such id doesn't exist");
+        }
+        catch(Exception ex){
+        System.out.println("Invalid Request");}
+        return null;*/
     }
 
     @GetMapping("/sfc")

@@ -12,7 +12,6 @@ import org.sat4j.tools.ModelIterator;
 import org.sat4j.tools.OptToSatAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Solver {
@@ -70,10 +69,7 @@ public class Solver {
 
     */
 
-    //private int[] result;
-    //private long[] zoneIds;
-
-    private List<Integer> result = new ArrayList<>();
+    private final List<Integer> result = new ArrayList<>();
     private List<Long> zoneIds = new ArrayList<>();
 
 
@@ -81,7 +77,7 @@ public class Solver {
      * Konstruktor klasy inicjujący solver
      * param sectors tablica float z zajętością sektorów od 1-7, opis w lini 40, zajętość wpływa na wagi
      * param zoneIds id kolejnych stref (1-7) z bazydanych
-     * @throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
+     * //@throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
      */
     public Solver(List<ZoneEntity> zones, UserEntity user) {
 
@@ -118,7 +114,7 @@ public class Solver {
             try {
                 maxSatSolver.addSoftClause((int) (e.getPriority()),new VecInt(clause)); // adapt Array to IVecInt
             }catch (ContradictionException exception ){
-                System.out.println(exception.toString());
+                System.out.println(exception.getMessage());
             }
             //System.out.println(e.getPriority());
         }
@@ -151,7 +147,7 @@ public class Solver {
             if (solver.isSatisfiable()){
                 int [] temp =solver.model();
                 for (int t : temp) result.add(t);
-                System.out.println(result.toString());
+                System.out.println(result);
             }else{
                 // TODO : Napisać tu coś watościowego
                 System.out.println("Nierozwiązywale warunki\n");
@@ -161,7 +157,6 @@ public class Solver {
         }catch (TimeoutException e){
             e.printStackTrace();
         }
-        this.zoneIds = zoneIds;
     }
 
 

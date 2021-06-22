@@ -87,4 +87,10 @@ public class ZoneServiceImpl implements ZoneService{
             this.zoneRepository.save(zone);
         }
     }
+
+    @Override
+    public boolean isAdjacent(ZoneEntity zone, int x, int y) {
+        return (zone.getCordX() <= x + 1 & zone.getCordX() >= x - 1 & zone.getCordY() <= y + 1 & zone.getCordY() >= y) ||
+                (zone.getCordX() == x & zone.getCordY() == y - 1);
+    }
 }
