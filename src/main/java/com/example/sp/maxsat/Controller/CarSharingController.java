@@ -39,8 +39,12 @@ public class CarSharingController {
     @GetMapping("/sfps")
     public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,
                                        @RequestParam(value = "Lon", defaultValue = "0") int y,
-                                       @RequestParam(value = "userId", defaultValue = "-1")int userId) {
-
+                                       @RequestParam(value = "userId", defaultValue = "-1")int userId,
+                                       @RequestParam(value = "czySkapy", defaultValue = "1")int czySkapy,
+                                       @RequestParam(value = "czyDba_o_Wygode", defaultValue = "0")int czyDba){
+        List<Integer> preferences = new ArrayList<>();
+        preferences.add(czySkapy);
+        preferences.add(czyDba);
         List<ZoneEntity> zones = new ArrayList<>();
         //wybierz strefy z bazy danych które przylegają do lokacji
         zoneService.getAllZones().forEach(zone -> {
@@ -70,7 +74,7 @@ public class CarSharingController {
 
         List<zoneTuple> results = new ArrayList<>();
         //try {
-        Solver solver = new Solver(zones, userService.getAllUsers().get(NoUser));
+        Solver solver = new Solver(zones, userService.getAllUsers().get(NoUser),preferences);
         parkingService.getAllParkingLots().forEach(parking ->
                 results.add(new zoneTuple(parking.getParkingLotId(), solver.test(parking))));
 
