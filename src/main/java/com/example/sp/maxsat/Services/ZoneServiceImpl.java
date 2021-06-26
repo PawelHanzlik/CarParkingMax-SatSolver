@@ -90,7 +90,21 @@ public class ZoneServiceImpl implements ZoneService{
 
     @Override
     public boolean isAdjacent(ZoneEntity zone, int x, int y) {
-        return (zone.getCordX() <= x + 1 & zone.getCordX() >= x - 1 & zone.getCordY() <= y + 1 & zone.getCordY() >= y) ||
-                (zone.getCordX() == x & zone.getCordY() == y - 1);
+        if ((zone.getCordX() <= x + 1 & zone.getCordX() >= x - 1 & zone.getCordY() <= y + 1 & zone.getCordY() >= y) ||
+                (zone.getCordX() == x & zone.getCordY() == y - 1)){
+            System.out.println(zone.getCordX()+" "+zone.getCordY());
+            findByCoords(zone.getCordX(),zone.getCordY());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void findByCoords(int x, int y){
+        List<ZoneEntity> entities = this.zoneRepository.findAll();
+        for (ZoneEntity z : entities){
+            if (z.getCordX() == x && z.getCordY() == y)
+                System.out.println(z.getZoneId());
+        }
     }
 }

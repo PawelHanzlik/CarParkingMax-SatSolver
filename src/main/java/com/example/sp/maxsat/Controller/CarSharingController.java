@@ -7,6 +7,7 @@ import com.example.sp.maxsat.Services.ParkingLotService;
 import com.example.sp.maxsat.Services.UserService;
 import com.example.sp.maxsat.Services.ZoneService;
 import com.example.sp.maxsat.Solver;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +54,7 @@ public class CarSharingController {
             }
         });
 
+        @Getter
         class zoneTuple {
             public final long ParkingId;
             public final int Score;
@@ -74,11 +76,11 @@ public class CarSharingController {
 
         List<zoneTuple> results = new ArrayList<>();
         //try {
-        Solver solver = new Solver(zones, userService.getAllUsers().get(NoUser),preferences);
+        Solver solver = new Solver(zones, userService.getUser((long) NoUser),preferences);
         parkingService.getAllParkingLots().forEach(parking ->
                 results.add(new zoneTuple(parking.getParkingLotId(), solver.test(parking))));
 
-        results.sort(Comparator.comparingInt(obj -> obj.Score));
+        results.sort(Comparator.comparingInt(zoneTuple::getScore).reversed());
         return zoneService.getAllZones().size() + "\n" + results;
         /*}catch (NoSuchUserException ex){
             System.out.println("User with such id doesn't exist");

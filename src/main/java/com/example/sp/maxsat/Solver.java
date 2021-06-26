@@ -76,7 +76,7 @@ public class Solver {
     */
 
     private final List<Integer> result = new ArrayList<>();
-    private List<Long> zoneIds = new ArrayList<>();
+    private final List<Long> zoneIds = new ArrayList<>();
 
 
     /**
@@ -134,25 +134,25 @@ public class Solver {
             if (user.getHandicaped()){
                 maxSatSolver.addSoftClause(25,new VecInt(new int[]{12}));
             }else{
-                maxSatSolver.addSoftClause(15,new VecInt(new int[]{}));
+                maxSatSolver.addSoftClause(15,new VecInt(new int[]{-12}));
             }
             //U10
             if (user.getCarSize()>5){
                 maxSatSolver.addSoftClause(20,new VecInt(new int[]{10}));
             }else{
-                maxSatSolver.addSoftClause(10,new VecInt(new int[]{}));
+                maxSatSolver.addSoftClause(10,new VecInt(new int[]{-10}));
             }
             //U11
             if (preferences.get(0) == 1){
                 maxSatSolver.addSoftClause(15,new VecInt(new int[]{-11}));
             }else{
-                maxSatSolver.addSoftClause(20,new VecInt(new int[]{}));
+                maxSatSolver.addSoftClause(20,new VecInt(new int[]{11}));
             }
             //U12
             if (preferences.get(1) == 1){
                 maxSatSolver.addSoftClause(20,new VecInt(new int[]{10,9}));
             }else{
-                maxSatSolver.addSoftClause(10,new VecInt(new int[]{}));
+                maxSatSolver.addSoftClause(10,new VecInt(new int[]{-9}));
             }
         } catch (ContradictionException exception) {
             exception.printStackTrace();
@@ -198,29 +198,31 @@ public class Solver {
         //todo : Ewidentnie zmienna o danym numerze nie ma stałego miejsca w tablicy
 
         //S12 - niepełnosprawni
-        if (result.contains(zoneIds.size()+1)){
-            //można zrobić (result[zoneIds.length]>0 == parking.getIsForHandicapped()) score ++
-            // ale tak jest czytelniej
-            if (parking.getIsForHandicapped())
-                score++;
-        }else{
-            if (!parking.getIsForHandicapped())
-                score++;
-        }
+        if (result.contains(12) && parking.getIsForHandicapped())
+            score++;
+        else if (result.contains(-12) && !parking.getIsForHandicapped())
+            score++;
 
         //S9 - 10 wolnych miejsc
-        if (result.contains(zoneIds.size()+2) && parking.getFreeSpaces()>10)
+        if (result.contains(9) && parking.getFreeSpaces() > 10)
+            score++;
+
+        else if (result.contains(-9) && parking.getFreeSpaces() < 10)
             score++;
 
         //S10 - Guarded
-        if (result.contains(zoneIds.size()+3) && parking.getIsGuarded())
+        if (result.contains(10) && parking.getIsGuarded())
             score++;
 
-        //S11 - Rozmiar Miejsca
-        if(result.contains(zoneIds.size()+4) && parking.getSpotSize()>5)
+        else if (result.contains(-10) && !parking.getIsGuarded())
             score++;
 
+        //S11 - Płatny
+        if(result.contains(11) && parking.getIsPaid())
+            score++;
 
+        else if(result.contains(-11) && !parking.getIsPaid())
+            score++;
 
 
 
