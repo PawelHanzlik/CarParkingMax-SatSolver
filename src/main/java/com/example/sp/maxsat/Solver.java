@@ -87,7 +87,7 @@ public class Solver {
      */
     public Solver(List<ZoneEntity> zones, UserEntity user, List<Integer> preferences) {
 
-        final int MAXVAR = zones.size()+6;
+        final int MAXVAR = 13;
         final int NBCLAUSES = zones.size()+1+5;//strefy + dodatkowa na strefy + niepełnosprawni itp(2)
 
         //Lista/klauzula ze wszystkimi strefami
@@ -118,6 +118,7 @@ public class Solver {
             zoneIds.add(e.getZoneId());
 
             try {
+                //System.out.println(e.getPriority());
                 maxSatSolver.addSoftClause((int) (e.getPriority()),new VecInt(clause)); // adapt Array to IVecInt
             }catch (ContradictionException exception ){
                 System.out.println(exception.getMessage());
