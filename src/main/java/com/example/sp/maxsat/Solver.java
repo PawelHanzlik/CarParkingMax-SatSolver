@@ -12,7 +12,6 @@ import org.sat4j.tools.ModelIterator;
 import org.sat4j.tools.OptToSatAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Solver {
@@ -53,40 +52,43 @@ public class Solver {
     Zmienne
         zmienna ujemna - zaprzeczenie
 
-        S1 .. S7 - parking znajduje się w strefie 1-7
-        S8 - parking jest dla niepełnosprawnych
-        S9 - Parking ma conajmniej 10 wolnych miejsc parkingowych
-        S10- Parking guarded
-        S11- Rozmiar miejsca>5
+        S1  ..  S7  -   Parking znajduje się w strefie 1-7
+        S8  -   Parking znajduje się w strefie preferowanej przez klienta
+        S9  -   Parking ma conajmniej 10 wolnych miejsc parkingowych
+        S10 -   Parking jest strzeżony
+        S11 -   Parking jest płatny
+        S12 -   Parking jest dla niepełnosprawnych
+        S13 -   Rozmiar parkingu > 5
 
     Klauzule
-        U1 .. U7 = Strefa ma wysokie zapotrzebowanie
+        U0  -   Należy wybrać co najmniej jedną strefę
+        U1  ..  U7  =   Strefa ma wysokie zapotrzebowanie
             [x & -1 ..-(x-1) & -(x+1) .. -7]
-        U8 - Niepełnosprawny -> dla niepełnosprawnych lub strażnik do pomocy
-            [8 10]
-       -U8 Pełnosprawna osoba - [-8]
-        U9 - Rozmiar samochodu() >5 - dużo wolnych miejsc lub duże miejsca
-            [9 11]
-
+        U8  -   Preferowana strefa klienta to ta, którą wskazał solver // to pewnie do wyjebania
+        U9  -   Klient jest niepełnosprawny ->  [12] waga 25
+       -U9  -   Pełnosprawna osoba = [-12] waga 15
+        U10 -   Rozmiar samochodu() >5 -  dużo wolnych miejsc lub duże miejsca [10] waga 20
+       -U10 -   Rozmiar samochodu() <5 =  [-10] waga 10
+        U11 -   Klient jest skąpy =  [-11] waga 15
+       -U11 -   Klient nie jest skąpy = [11] waga 25
+        U12 -   Klient dba o wygodę parkowania =  [10,9] waga 20
+       -U12 -   Klient nie dba o wygodę parkowania = [-9] waga 10
     */
 
-    //private int[] result;
-    //private long[] zoneIds;
-
-    private List<Integer> result = new ArrayList<>();
-    private List<Long> zoneIds = new ArrayList<>();
+    private final List<Integer> result = new ArrayList<>();
+    private final List<Long> zoneIds = new ArrayList<>();
 
 
     /**
      * Konstruktor klasy inicjujący solver
      * param sectors tablica float z zajętością sektorów od 1-7, opis w lini 40, zajętość wpływa na wagi
      * param zoneIds id kolejnych stref (1-7) z bazydanych
-     * @throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
+     * //@throws Exception Wywala błąd gdy nie ma rozwiązania klauzul co nie powinno się zdażyć bo WEIGHTED max-sat
      */
-    public Solver(List<ZoneEntity> zones, UserEntity user) {
+    public Solver(List<ZoneEntity> zones, UserEntity user, List<Integer> preferences) {
 
-        final int MAXVAR = zones.size()+4;
-        final int NBCLAUSES = zones.size()+1+2;//strefy + dodatkowa na strefy + niepełnosprawni itp(2)
+        final int MAXVAR = 13;
+        final int NBCLAUSES = zones.size()+1+5;//strefy + dodatkowa na strefy + niepełnosprawni itp(2)
 
         //Lista/klauzula ze wszystkimi strefami
         int[] sdata = new int[zones.size()];
@@ -118,7 +120,7 @@ public class Solver {
             try {
                 maxSatSolver.addSoftClause((int) (e.getPriority()),new VecInt(clause)); // adapt Array to IVecInt
             }catch (ContradictionException exception ){
-                System.out.println(exception.toString());
+                System.out.println(exception.getMessage());
             }
             //System.out.println(e.getPriority());
         }
@@ -127,22 +129,34 @@ public class Solver {
             //Wymuś wybranie przynajmniej jednej strefy
             maxSatSolver.addSoftClause(999999,new VecInt(sdata));
             //U8
-            if (user.getHandicaped()){
-                maxSatSolver.addSoftClause(10,new VecInt(new int[]{8,10}));
-            }else{
-                maxSatSolver.addSoftClause(10,new VecInt(new int[]{}));
-            }
-            //U9
-            if (user.getCarSize()>5){
-                maxSatSolver.addSoftClause(10,new VecInt(new int[]{9,11}));
-            }else{
-                maxSatSolver.addSoftClause(10,new VecInt(new int[]{}));
-            }
 
+            //U9
+            if (user.getHandicaped()){
+                maxSatSolver.addSoftClause(25,new VecInt(new int[]{12}));
+            }else{
+                maxSatSolver.addSoftClause(15,new VecInt(new int[]{-12}));
+            }
+            //U10
+            if (user.getCarSize()>5){
+                maxSatSolver.addSoftClause(20,new VecInt(new int[]{10}));
+            }else{
+                maxSatSolver.addSoftClause(10,new VecInt(new int[]{-10}));
+            }
+            //U11
+            if (preferences.get(0) == 1){
+                maxSatSolver.addSoftClause(15,new VecInt(new int[]{-11}));
+            }else{
+                maxSatSolver.addSoftClause(20,new VecInt(new int[]{11}));
+            }
+            //U12
+            if (preferences.get(1) == 1){
+                maxSatSolver.addSoftClause(20,new VecInt(new int[]{10,9}));
+            }else{
+                maxSatSolver.addSoftClause(10,new VecInt(new int[]{-9}));
+            }
         } catch (ContradictionException exception) {
             exception.printStackTrace();
         }
-
         try {   //contradiction exeption...
             //Jeśli cecha to klauzula
             //Strefy jeśli zapotrzebowanie wysokie to ta a nie inna
@@ -151,7 +165,7 @@ public class Solver {
             if (solver.isSatisfiable()){
                 int [] temp =solver.model();
                 for (int t : temp) result.add(t);
-                System.out.println(result.toString());
+                System.out.println(result);
             }else{
                 // TODO : Napisać tu coś watościowego
                 System.out.println("Nierozwiązywale warunki\n");
@@ -161,7 +175,6 @@ public class Solver {
         }catch (TimeoutException e){
             e.printStackTrace();
         }
-        this.zoneIds = zoneIds;
     }
 
 
@@ -184,30 +197,32 @@ public class Solver {
 
         //todo : Ewidentnie zmienna o danym numerze nie ma stałego miejsca w tablicy
 
-        //S8 - niepełnosprawni
-        if (result.contains(zoneIds.size()+1)){
-            //można zrobić (result[zoneIds.length]>0 == parking.getIsForHandicapped()) score ++
-            // ale tak jest czytelniej
-            if (parking.getIsForHandicapped())
-                score++;
-        }else{
-            if (!parking.getIsForHandicapped())
-                score++;
-        }
+        //S12 - niepełnosprawni
+        if (result.contains(12) && parking.getIsForHandicapped())
+            score++;
+        else if (result.contains(-12) && !parking.getIsForHandicapped())
+            score++;
 
         //S9 - 10 wolnych miejsc
-        if (result.contains(zoneIds.size()+2) && parking.getFreeSpaces()>10)
+        if (result.contains(9) && parking.getFreeSpaces() > 10)
+            score++;
+
+        else if (result.contains(-9) && parking.getFreeSpaces() < 10)
             score++;
 
         //S10 - Guarded
-        if (result.contains(zoneIds.size()+3) && parking.getIsGuarded())
+        if (result.contains(10) && parking.getIsGuarded())
             score++;
 
-        //S11 - Rozmiar Miejsca
-        if(result.contains(zoneIds.size()+4) && parking.getSpotSize()>5)
+        else if (result.contains(-10) && !parking.getIsGuarded())
             score++;
 
+        //S11 - Płatny
+        if(result.contains(11) && parking.getIsPaid())
+            score++;
 
+        else if(result.contains(-11) && !parking.getIsPaid())
+            score++;
 
 
 

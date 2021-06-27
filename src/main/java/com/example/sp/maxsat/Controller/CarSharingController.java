@@ -7,6 +7,7 @@ import com.example.sp.maxsat.Services.ParkingLotService;
 import com.example.sp.maxsat.Services.UserService;
 import com.example.sp.maxsat.Services.ZoneService;
 import com.example.sp.maxsat.Solver;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public class CarSharingController {
     private final ParkingLotService parkingService;
     private final UserService userService;
 
-    private int sfpcTestcounter = 0;
+    private int sfpcTestCounter = 0;
 
     @Autowired
     public CarSharingController(ZoneService zoneService,ParkingLotService parkingLotService,UserService userService){
@@ -37,36 +38,56 @@ public class CarSharingController {
 
 
     @GetMapping("/sfps")
-    public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,@RequestParam(value = "Lon", defaultValue = "0") int y,@RequestParam(value = "user", defaultValue = "-1")int user) {
-
+    public String searchForParkingSpot(@RequestParam(value = "Lat", defaultValue = "0") int x,
+                                       @RequestParam(value = "Lon", defaultValue = "0") int y,
+                                       @RequestParam(value = "userId", defaultValue = "-1")int userId,
+                                       @RequestParam(value = "czySkapy", defaultValue = "1")int czySkapy,
+                                       @RequestParam(value = "czyDba_o_Wygode", defaultValue = "0")int czyDba){
+        List<Integer> preferences = new ArrayList<>();
+        preferences.add(czySkapy);
+        preferences.add(czyDba);
         List<ZoneEntity> zones = new ArrayList<>();
         //wybierz strefy z bazy danych które przylegają do lokacji
         zoneService.getAllZones().forEach(zone -> {
-            if ((zone.getCordX()<= x+1 & zone.getCordX()>= x-1 & zone.getCordY()<= y+1 & zone.getCordY()>= y) ||
-                    (zone.getCordX()==x & zone.getCordY()==y-1)){ zones.add(zone);}
+            if (zoneService.isAdjacent(zone, x, y)) {
+                zones.add(zone);
+            }
         });
 
-        class zonetouple{
-            public final long ZoneId;
+        @Getter
+        class zoneTuple {
+            public final long ParkingId;
             public final int Score;
-            public zonetouple(long parkingId,int Score){this.ZoneId = parkingId;this.Score=Score;}
+
+            public zoneTuple(long parkingId, int Score) {
+                this.ParkingId = parkingId;
+                this.Score = Score;
+            }
 
             @Override
-            public String toString(){
-                return String.format("ZoneId: %d     Score: %d \n", ZoneId,Score);
+            public String toString() {
+                return String.format("ParkingId: %d     Score: %d \n", ParkingId, Score);
             }
         }
+
         int NoUser;
-        if (user == (-1)) NoUser = this.sfpcTestcounter++;
-        else NoUser = user;
+        if (userId == (-1)) NoUser = this.sfpcTestCounter++;
+        else NoUser = userId;
 
-        List<zonetouple> results = new ArrayList<>();
-        Solver solver = new Solver(zones,userService.getAllUsers().get(NoUser));
+        List<zoneTuple> results = new ArrayList<>();
+        //try {
+        Solver solver = new Solver(zones, userService.getUser((long) NoUser),preferences);
         parkingService.getAllParkingLots().forEach(parking ->
-                results.add(new zonetouple(parking.getParkingLotId(),solver.test(parking))));
+                results.add(new zoneTuple(parking.getParkingLotId(), solver.test(parking))));
 
-        results.sort(Comparator.comparingInt(obj -> obj.Score));
+        results.sort(Comparator.comparingInt(zoneTuple::getScore).reversed());
         return zoneService.getAllZones().size() + "\n" + results;
+        /*}catch (NoSuchUserException ex){
+            System.out.println("User with such id doesn't exist");
+        }
+        catch(Exception ex){
+        System.out.println("Invalid Request");}
+        return null;*/
     }
 
     @GetMapping("/sfc")
