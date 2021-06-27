@@ -118,7 +118,6 @@ public class Solver {
             zoneIds.add(e.getZoneId());
 
             try {
-                //System.out.println(e.getPriority());
                 maxSatSolver.addSoftClause((int) (e.getPriority()),new VecInt(clause)); // adapt Array to IVecInt
             }catch (ContradictionException exception ){
                 System.out.println(exception.getMessage());
